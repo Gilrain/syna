@@ -1,41 +1,19 @@
 {{- $self := . -}}
 {{- .page_scratch.Add "js" (dict "file" "syna-collapse.js") -}}
 
-{{/* Sets page to either the given frontmatter section variable, current
-  parent section or if the current page is a section, the current page */}}
-{{- .page_scratch.Set "page" (.Site.GetPage "Section" (.Params.section | default .root.Section)) -}}
-{{- if .root.CurrentSection -}}
-  {{- if and (not .Params.section) (eq .root.CurrentSection.Kind "section") -}}
-    {{- .page_scratch.Set "page" .root.CurrentSection -}}
-  {{- end -}}
-{{- end -}}
+{{- $list_pages := partial "helpers/list-pages.html" (dict "Site" .Site "Params" .Params "root" .root "page_scratch" .page_scratch) -}}
+{{- $render_pagination := $list_pages.render_pagination -}}
+{{- $sorted_pages := $list_pages.sorted_pages -}}
 
-{{- .page_scratch.Set "pages" (.page_scratch.Get "page").Pages -}}
-{{- if .Params.subsections -}}
-  {{- .page_scratch.Add "pages" (.page_scratch.Get "page").Sections -}}
-{{- end -}}
-{{- if .Params.subsection_leaves -}}
-  {{- range (.page_scratch.Get "page").Sections -}}
-    {{- $self.page_scratch.Add "pages" .Pages -}}
-  {{- end -}}
-{{- end -}}
-
-{{/* Pagination is used if paginate (default value is 10) is more than
-  frontmatter count variable */}}
-{{- $renderPagination := and (in (slice "section" "home") .root.Kind) (or (not (isset .Params "count")) (le .Params.count 0)) -}}
-{{- if $renderPagination -}}
-  {{- $paginator := .root.Paginate ($self.page_scratch.Get "pages") -}}
-  {{- .page_scratch.Set "pages" $paginator.Pages -}}
-  {{- .page_scratch.Set "paginator" $paginator -}}
-{{- end -}}
 {{- $bg := .self.Scratch.Get "bg" }}
 {{- partial "helpers/container.html" (dict "start" true "in_slot" .in_slot "bg" $bg "Name" .Name "Params" .Params) -}}
   {{- partial "helpers/section-header.html" (dict "self" $self.self "bg" $bg "params" .Params) }}
   <div class="row mx-0
     {{- partial "helpers/text-color.html" (dict "self" $self.self "light" "secondary") -}}
   ">
-    {{- range first (.Params.count | default 10) (.page_scratch.Get "pages") -}}
+    {{- range first (.Params.count | default 10) $sorted_pages -}}
       {{- $page := . -}}
+      {{- $page_title := partial "helpers/page-title.html" (dict "page" . "self" .) -}}
       {{- $self.page_scratch.Set "article_page_fragments" (slice .) -}}
       {{- range .Resources.ByType "page" -}}
         {{- $self.page_scratch.Add "article_page_fragments" . -}}
@@ -62,7 +40,7 @@
           {{- if $self.Params.tiled }}
             <div class="card-body">
           {{- end -}}
-            {{- if .Params.title -}}
+            {{- if $page_title -}}
               {{- if $self.Params.tiled }}
                 <div class="card-title">
               {{- end }}
@@ -81,7 +59,7 @@
                         {{- if eq $.page.Permalink .Permalink }} active-page {{- end -}}
                       ">
                         <a href="{{ .Permalink }}">
-                          {{- .Params.title | markdownify -}}
+                          {{- $page_title | markdownify -}}
                         </a>
                       </h4>
                     {{- else }}
@@ -89,7 +67,7 @@
                         {{- if eq $.page.Permalink .Permalink }} active-page {{- end -}}
                       ">
                         <a href="{{ .Permalink }}">
-                          {{- .Params.title | markdownify -}}
+                          {{- $page_title | markdownify -}}
                         </a>
                       </h5>
                     {{- end -}}
@@ -131,7 +109,7 @@
                   ">
                     <img
                       src="{{ partial "helpers/image.html" (dict "root" $root "asset" .Params.asset) }}"
-                      alt="{{ .Params.subtitle | default .Params.title }}"
+                      alt="{{ .Params.subtitle | default $page_title }}"
                       class="img-fluid mb-4">
                   </div>
                 {{- end -}}
@@ -176,7 +154,7 @@
       {{- end -}}
     {{- end }}
   </div>
-  {{- if $renderPagination -}}
+  {{- if $render_pagination -}}
     {{- partial "helpers/pagination.html" (dict "paginator" .root.Paginator "page_scratch" .page_scratch) -}}
   {{- end }}
 {{- partial "helpers/container.html" (dict "end" true "in_slot" .in_slot) -}}

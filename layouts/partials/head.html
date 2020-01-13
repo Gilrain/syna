@@ -1,4 +1,5 @@
-{{- $title := printf "%s%s" .Title (cond (not .IsHome) (printf " &middot; %s" .Site.Title) (print "")) -}}
+{{- $page_title := partial "helpers/page-title.html" (dict "page" . "self" .) -}}
+{{- $title := printf "%s%s" $page_title (cond .IsHome (print "") (printf " &middot; %s" .Site.Title)) -}}
 {{- $content_fragment := first 1 ((where ((.Scratch.Get "page_fragments") | default (slice)) "Params.fragment" "in" "content") | default (slice)) -}}
 {{- .Scratch.Set "page_description" .Site.Params.Description -}}
 {{- range $content_fragment -}}
@@ -6,15 +7,14 @@
 {{- end -}}
 <head>
   <meta name="theme" content="Syna">
-  <meta name="theme-version" content="v0.15">
+  <meta name="theme-version" content="v0.16">
   <meta name="theme-url" content="https://syna.okkur.org">
   <meta name="theme-description" content="Highly customizable open source theme for Hugo based static websites">
   <meta name="theme-author" content="Okkur Labs">
   <meta name="theme-author-url" content="https://about.okkur.org">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta http-equiv="Content-Language" content="{{ .Site.LanguageCode | default "en-us" }}">
-  <meta name="google" value="notranslate">
+  <meta name="google" content="notranslate" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="description" content="{{- .Scratch.Get "page_description" -}}">

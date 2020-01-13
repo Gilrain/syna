@@ -6,9 +6,12 @@ title = "Okkur - Syna"
 theme = "syna"
 themesDir = "../.."
 enableGitInfo = true
-version = "0.15.0"
+version = "0.16.0"
 disableKinds = ["RSS", "taxonomy", "taxonomyTerm"]
 ignorefiles = [ "content/dev/.*" ]
+
+# Google Analytics tracking
+googleAnalytics = ""
 
 [outputs]
   home = ["HTML", "JSON"]
@@ -17,8 +20,10 @@ ignorefiles = [ "content/dev/.*" ]
 date = ["date", "lastmod"]
 lastmod = ["lastmod", ":git", "date"]
 
-# Google Analytics tracking
-googleAnalytics = ""
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+     unsafe = true
 
 [params]
   name = "Okkur Labs"
@@ -99,7 +104,7 @@ googleAnalytics = ""
 [[menu.footer_social]]
   weight = 30
   name = "github"
-  url = "https://syna.okkur.org/code"
+  url = "https://git.okkur.org/syna"
   pre = "fab fa-github fa-stack-2x"
 
 [[menu.copyright_footer]]
